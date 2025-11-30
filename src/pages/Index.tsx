@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -119,11 +120,23 @@ const engines: Engine[] = [
 ];
 
 export default function Index() {
+  const navigate = useNavigate();
   const [selectedType, setSelectedType] = useState<string>('all');
   const [selectedManufacturer, setSelectedManufacturer] = useState<string>('all');
   const [powerRange, setPowerRange] = useState<number[]>([0, 400]);
   const [cart, setCart] = useState<Engine[]>([]);
   const [activeSection, setActiveSection] = useState<string>('catalog');
+
+  useEffect(() => {
+    const savedCart = localStorage.getItem('cart');
+    if (savedCart) {
+      setCart(JSON.parse(savedCart));
+    }
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem('cart', JSON.stringify(cart));
+  }, [cart]);
 
   const filteredEngines = engines.filter((engine) => {
     const typeMatch = selectedType === 'all' || engine.type === selectedType;
@@ -133,7 +146,9 @@ export default function Index() {
   });
 
   const addToCart = (engine: Engine) => {
-    setCart([...cart, engine]);
+    const newCart = [...cart, engine];
+    setCart(newCart);
+    localStorage.setItem('cart', JSON.stringify(newCart));
   };
 
   const removeFromCart = (engineId: number) => {
@@ -214,7 +229,7 @@ export default function Index() {
                       <span>Итого:</span>
                       <span>{totalPrice.toLocaleString()} ₽</span>
                     </div>
-                    <Button className="w-full" size="lg">
+                    <Button className="w-full" size="lg" onClick={() => navigate('/checkout')}>
                       Оформить заказ
                     </Button>
                   </>
