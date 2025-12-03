@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useUserAuth } from '@/contexts/UserAuthContext';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -9,6 +10,7 @@ import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTr
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Separator } from '@/components/ui/separator';
 import Icon from '@/components/ui/icon';
+import Footer from '@/components/Footer';
 
 type Engine = {
   id: number;
@@ -121,6 +123,7 @@ const engines: Engine[] = [
 
 export default function Index() {
   const navigate = useNavigate();
+  const { isLoggedIn } = useUserAuth();
   const [selectedType, setSelectedType] = useState<string>('all');
   const [selectedManufacturer, setSelectedManufacturer] = useState<string>('all');
   const [powerRange, setPowerRange] = useState<number[]>([0, 400]);
@@ -170,7 +173,7 @@ export default function Index() {
               <p className="text-sm text-muted-foreground">Профессиональные решения</p>
             </div>
           </div>
-          <nav className="hidden md:flex gap-6 font-['Roboto']">
+          <nav className="hidden md:flex gap-6 font-['Roboto'] items-center">
             <button onClick={() => setActiveSection('catalog')} className="hover:text-primary transition-colors">
               Каталог
             </button>
@@ -190,6 +193,13 @@ export default function Index() {
               Контакты
             </button>
           </nav>
+          <div className="flex items-center gap-3">
+            {isLoggedIn && (
+              <Button variant="ghost" onClick={() => navigate('/account')}>
+                <Icon name="User" size={20} className="mr-2" />
+                Профиль
+              </Button>
+            )}
           <Sheet>
             <SheetTrigger asChild>
               <Button variant="outline" className="relative">

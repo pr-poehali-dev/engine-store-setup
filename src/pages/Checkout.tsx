@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useUserAuth } from '@/contexts/UserAuthContext';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -8,6 +9,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Separator } from '@/components/ui/separator';
 import { Checkbox } from '@/components/ui/checkbox';
 import Icon from '@/components/ui/icon';
+import Footer from '@/components/Footer';
 
 type Engine = {
   id: number;
@@ -39,17 +41,23 @@ export default function Checkout() {
   const deliveryCost = deliveryCosts[deliveryMethod];
   const total = subtotal + deliveryCost;
 
+  const { login } = useUserAuth();
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
     const formData = new FormData(e.target as HTMLFormElement);
+    const name = formData.get('name') as string;
+    const phone = formData.get('phone') as string;
+    const email = formData.get('email') as string;
+
     const orderData = {
       id: Date.now().toString(),
       date: new Date().toISOString(),
       customer: {
-        name: formData.get('name'),
-        phone: formData.get('phone'),
-        email: formData.get('email'),
+        name,
+        phone,
+        email,
         isCompany: isLegalEntity,
         inn: isLegalEntity ? formData.get('inn') : undefined,
         companyName: isLegalEntity ? formData.get('companyName') : undefined,
@@ -69,9 +77,11 @@ export default function Checkout() {
     const existingOrders = JSON.parse(localStorage.getItem('orders') || '[]');
     localStorage.setItem('orders', JSON.stringify([...existingOrders, orderData]));
     
+    login(phone, name, email);
+    
     alert('Заказ успешно оформлен! Наш менеджер свяжется с вами в ближайшее время.');
     localStorage.removeItem('cart');
-    navigate('/');
+    navigate('/account');
   };
 
   if (cart.length === 0) {
