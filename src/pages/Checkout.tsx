@@ -41,6 +41,34 @@ export default function Checkout() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    const formData = new FormData(e.target as HTMLFormElement);
+    const orderData = {
+      id: Date.now().toString(),
+      date: new Date().toISOString(),
+      customer: {
+        name: formData.get('name'),
+        phone: formData.get('phone'),
+        email: formData.get('email'),
+        isCompany: isLegalEntity,
+        inn: isLegalEntity ? formData.get('inn') : undefined,
+        companyName: isLegalEntity ? formData.get('companyName') : undefined,
+      },
+      delivery: {
+        method: deliveryLabels[deliveryMethod],
+        address: deliveryMethod !== 'pickup' ? formData.get('address') : undefined,
+        cost: deliveryCost,
+      },
+      payment: formData.get('payment'),
+      items: cart,
+      total: total,
+      status: 'new',
+      comment: formData.get('comment'),
+    };
+
+    const existingOrders = JSON.parse(localStorage.getItem('orders') || '[]');
+    localStorage.setItem('orders', JSON.stringify([...existingOrders, orderData]));
+    
     alert('Заказ успешно оформлен! Наш менеджер свяжется с вами в ближайшее время.');
     localStorage.removeItem('cart');
     navigate('/');
